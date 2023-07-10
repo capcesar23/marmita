@@ -2,10 +2,8 @@ package br.com.enemarmitas.marmitas.controller.receita;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,90 +11,61 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.enemarmitas.marmitas.model.receita.FichaTecnica;
 import br.com.enemarmitas.marmitas.service.receita.FichaTecnicaService;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping("/fichas-tecnicas")
+@RequestMapping(value = "/receitas")
 @AllArgsConstructor
 public class FichaTecnicaController {
 
-    private final FichaTecnicaService fichaTecnicaService;
+    public FichaTecnicaService fichaTecnicaService;
 
     @GetMapping
-    public ResponseEntity<List<FichaTecnica>> getAll() {
-        List<FichaTecnica> fichasTecnicas = fichaTecnicaService.getAllFichasTecnicas();
-        return ResponseEntity.ok(fichasTecnicas);
+    public ResponseEntity<List<FichaTecnica>> listarFichaTecnicas() {
+        return ResponseEntity.ok().body(fichaTecnicaService.listar());
+    }
+
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<?> buscarFichaTecnica(
+            @PathVariable("id") Long id) {
+
+        return ResponseEntity.ok().body(fichaTecnicaService.buscarId(id));
     }
 
     @PostMapping
-    @Transactional
-    public ResponseEntity<FichaTecnica> create(@RequestBody @Validated FichaTecnica newFichaTecnica,
-            UriComponentsBuilder uriBuilder) {
-        FichaTecnica fichaTecnica = fichaTecnicaService.insertFichaTecnica(newFichaTecnica);
-        URI uri = uriBuilder.path("/fichas-tecnicas/{id}").buildAndExpand(fichaTecnica.getFichaTecnicaId()).toUri();
-        return ResponseEntity.created(uri).body(fichaTecnica);
+    public ResponseEntity<?> salvarFichaTecnica(
+        @RequestBody FichaTecnica fichaTecnica) {
+        fichaTecnica = fichaTecnicaService.salvar(fichaTecnica);
+        // URI serve para mostar o caminho de pesquisar 
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(fichaTecnica.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).build();
     }
 
-    @GetMapping("/{fichaTecnicaId}")
-    public ResponseEntity<FichaTecnica> read(@PathVariable Long fichaTecnicaId) {
-        Optional<FichaTecnica> optionalFichaTecnica = fichaTecnicaService.getFichaTecnicaById(fichaTecnicaId);
+    @PutMapping(value = "/atualizar/{id}")
+    public ResponseEntity<?> atualizarFichaTecnica(
+            @PathVariable("id") Long id,
+            @RequestBody FichaTecnica fichaTecnica) {
 
-        if (optionalFichaTecnica.isPresent()) {
-            FichaTecnica fichaTecnica = optionalFichaTecnica.get();
-            return ResponseEntity.ok(fichaTecnica);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        fichaTecnicaService.atualizar(id, fichaTecnica);
+        return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/buscar")
-    public ResponseEntity<List<FichaTecnica>> buscarByNome(@RequestParam("nome") String nome) {
-        List<FichaTecnica> fichasTecnicas = fichaTecnicaService.buscarByNome(nome);
+    @DeleteMapping(value = "/excluir/{id}")
+    public ResponseEntity<?> excluirFichaTecnica(
+            @PathVariable("id") Long id) {
 
-        if (!fichasTecnicas.isEmpty()) {
-            return ResponseEntity.ok(fichasTecnicas);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        fichaTecnicaService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{fichaTecnicaId}")
-    @Transactional
-    public ResponseEntity<FichaTecnica> update(@PathVariable Long fichaTecnicaId,
-            @RequestBody @Validated FichaTecnica updatedFichaTecnica) {
-        Optional<FichaTecnica> optionalFichaTecnica = fichaTecnicaService.getFichaTecnicaById(fichaTecnicaId);
-
-        if (optionalFichaTecnica.isPresent()) {
-            FichaTecnica existingFichaTecnica = optionalFichaTecnica.get();
-            
-            existingFichaTecnica.setNome(updatedFichaTecnica.getNome());
-            existingFichaTecnica.setQuantidadePorcoes(updatedFichaTecnica.getQuantidadePorcoes());
-            existingFichaTecnica.setPrecoReceita(updatedFichaTecnica.getPrecoReceita());
-            existingFichaTecnica.setPrecoTotal(updatedFichaTecnica.getPrecoTotal());
-
-            FichaTecnica novaFichaTecnica = fichaTecnicaService.updateFichaTecnica(existingFichaTecnica);
-            return ResponseEntity.ok(novaFichaTecnica);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{fichaTecnicaId}")
-    @Transactional
-    public ResponseEntity<?> delete(@PathVariable Long fichaTecnicaId) {
-        boolean deleted = fichaTecnicaService.deleteFichaTecnicaById(fichaTecnicaId);
-
-        if (deleted) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
 }

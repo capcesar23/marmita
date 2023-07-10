@@ -1,7 +1,10 @@
 package br.com.enemarmitas.marmitas.model.receita;
 
-import br.com.enemarmitas.marmitas.dto.receita.ModoDeFazerDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,23 +22,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ModoDeFazer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonInclude
     private Long modoFazerId;
 
-    @ManyToOne
+    @JsonIgnore // não esperar, para não gerar erro
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ficha_tecnica_id")
     private FichaTecnica fichaTecnica;
 
-    @Lob
+    @Lob// escrever texto grande
     private String descricao;
-
-    public ModoDeFazer (ModoDeFazerDTO modoDeFazerDTO){
-        this.modoFazerId= modoDeFazerDTO.modoFazerId();
-        this.fichaTecnica = modoDeFazerDTO.fichaTecnica();
-        this.descricao = modoDeFazerDTO.descricao();
-    }
-
-    public ModoDeFazer(ModoDeFazer modoDeFazerDTO) {
-    }
+    /*
+     * public ModoDeFazer (ModoDeFazerDTO modoDeFazerDTO){
+     * this.modoFazerId= modoDeFazerDTO.modoFazerId();
+     * this.fichaTecnica = modoDeFazerDTO.fichaTecnica();
+     * this.descricao = modoDeFazerDTO.descricao();
+     * }
+     */
 }

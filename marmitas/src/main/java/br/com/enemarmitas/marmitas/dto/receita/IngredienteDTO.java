@@ -3,7 +3,6 @@ package br.com.enemarmitas.marmitas.dto.receita;
 import java.math.BigDecimal;
 
 import br.com.enemarmitas.marmitas.model.receita.FichaTecnica;
-import br.com.enemarmitas.marmitas.model.receita.Ingrediente;
 
 public record IngredienteDTO(
         Long ingredienteId,
@@ -15,8 +14,8 @@ public record IngredienteDTO(
         BigDecimal custoLiquido,
         BigDecimal custoTotal,
         FichaTecnica fichaTecnica) {
-
-    public IngredienteDTO(Ingrediente ingrediente) {
+/*
+ * public IngredienteDTO(Ingrediente ingrediente) {
         this(
                 ingrediente.getIngredienteId(),
                 ingrediente.getNome(),
@@ -26,7 +25,11 @@ public record IngredienteDTO(
                 ingrediente.getCustoBruto(),
                 ingrediente.getCustoLiquido(),
                 ingrediente.getCustoTotal(),
-               ingrediente.getFichaTecnica()
-        );
+                ingrediente.getFichaTecnica());
     }
+ * 
+ */
+    
+
+
 }
